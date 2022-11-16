@@ -1,6 +1,6 @@
 import 'package:boleto_utils/src/constants/lista_bancos.dart';
-import 'package:boleto_utils/src/entities/boleto_validado.dart';
 import 'package:boleto_utils/src/entities/banco_emissor.dart';
+import 'package:boleto_utils/src/entities/boleto_validado.dart';
 import 'package:boleto_utils/src/entities/referencia.dart';
 import 'package:boleto_utils/src/extensions/first_where_or_empty.dart';
 import 'package:boleto_utils/src/extensions/numeric_only.dart';
@@ -10,17 +10,17 @@ import 'types/tipo_boleto.dart';
 
 ///Classe com métodos para a validação de todos os tipos de boleto do Brasil definidos pela FEBRABAN
 class BoletoUtils {
+  /// Pega uma string, remove todos os caracteres não numéricos e então verifica o comprimento do resultado.
+  /// Se o comprimento for 44, ele retornará um valor de enumeração `TipoCodigo.codigoDeBarras`. Se o comprimento for
+  /// entre 46 e 48, retorna um valor de enum `TipoCodigo.linhaDigitavel`. Caso contrário, retorna um
+  /// valor enum `TipoCodigo.invalido`
+  ///
+  /// Args:
+  /// codigo (String): O código que será analisado.
+  ///
+  /// Retorna:
+  /// O tipo de retorno é um TipoCodigo enum.
   TipoCodigo identificarTipoCodigo(String codigo) {
-    /// Pega uma string, remove todos os caracteres não numéricos e então verifica o comprimento do resultado.
-    /// Se o comprimento for 44, ele retornará um valor de enumeração `TipoCodigo.codigoDeBarras`. Se o comprimento for
-    /// entre 46 e 48, retorna um valor de enum `TipoCodigo.linhaDigitavel`. Caso contrário, retorna um
-    /// valor enum `TipoCodigo.invalido`
-    ///
-    /// Args:
-    /// codigo (String): O código que será analisado.
-    ///
-    /// Retorna:
-    /// O tipo de retorno é um TipoCodigo enum.
     codigo = codigo.numericOnly;
 
     if (codigo.length == 44) {
@@ -32,18 +32,17 @@ class BoletoUtils {
     }
   }
 
+  /// Verificando se os últimos 14 dígitos são todos zeros ou se os dígitos de 5 a 19 são todos zeros caso verdadeiro retorna `TipoBoleto.cartaoDeCredito`.
+  /// Senão
+  /// Verifica o primeiro dígito do código de barras, e se for 8, verifica o segundo dígito para determinar
+  /// o tipo de código de barras
+  ///
+  /// Args:
+  /// codigo (String): O número do código de barras.
+  ///
+  /// Retorna:
+  /// O tipo do boleto.
   TipoBoleto? identificarTipoBoleto(String codigo) {
-    /// Verificando se os últimos 14 dígitos são todos zeros ou se os dígitos de 5 a 19 são todos zeros caso verdadeiro retorna `TipoBoleto.cartaoDeCredito`.
-    /// Senão
-    /// Verifica o primeiro dígito do código de barras, e se for 8, verifica o segundo dígito para determinar
-    /// o tipo de código de barras
-    ///
-    /// Args:
-    /// codigo (String): O número do código de barras.
-    ///
-    /// Retorna:
-    /// O tipo do boleto.
-
     codigo = codigo.numericOnly;
 
     if (codigo.split('').reversed.join().substring(14) == '00000000000000' ||
@@ -72,17 +71,17 @@ class BoletoUtils {
     return null;
   }
 
+  ///Valida o terceiro campo da numeração inserida para definir como será calculado o Dígito Verificador.
+  ///Requer numeração completa (com ou sem formatação).
+  ///
+  /// Pega um código de barras e retorna uma classe `Referencia`
+  ///
+  /// Args:
+  /// código de barras (String): A string do código de barras.
+  ///
+  /// Retorna:
+  /// retorna uma classe `Referencia`.
   Referencia? _identificarReferencia(String barcode) {
-    ///Valida o terceiro campo da numeração inserida para definir como será calculado o Dígito Verificador.
-    ///Requer numeração completa (com ou sem formatação).
-    ///
-    /// Pega um código de barras e retorna uma classe `Referencia`
-    ///
-    /// Args:
-    /// código de barras (String): A string do código de barras.
-    ///
-    /// Retorna:
-    /// retorna uma classe `Referencia`.
     barcode = barcode.numericOnly;
 
     final referencia = barcode.substring(2, 3);
@@ -97,23 +96,23 @@ class BoletoUtils {
     return obj[referencia];
   }
 
+  /// Pega um código de barras e retorna uma linha digitável
+  ///
+  /// Args:
+  /// código de barras (String): O código de barras a ser convertido.
+  /// formatada (bool): Se true, o resultado será formatado com pontos e espaços. Padrões para falso
+  ///
+  /// Retorna:
+  /// Uma linha digitável
+  ///
+  ///Se [formatada] for `true` retorna a linha digitável formatada quando for `TipoCodigo.codigoDeBarras`
   String codBarrasParaLinhaDigitavel({
     required String barcode,
     bool formatada = false,
-
-    ///Se for `true` retorna a linha digitável formatada quando for `TipoCodigo.codigoDeBarras`
   }) {
-    /// Pega um código de barras e retorna uma linha digitável
-    ///
-    /// Args:
-    /// código de barras (String): O código de barras a ser convertido.
-    /// formatada (bool): Se true, o resultado será formatado com pontos e espaços. Padrões para falso
-    ///
-    /// Retorna:
-    /// Uma linha digitável
     barcode = barcode.numericOnly;
 
-    /// Chamando a função identificarTipoBoleto e passando o código de barras como parâmetro.
+    // Chamando a função identificarTipoBoleto e passando o código de barras como parâmetro.
     final tipoBoleto = identificarTipoBoleto(barcode);
 
     String resultado = '';
@@ -173,9 +172,9 @@ class BoletoUtils {
     return resultado;
   }
 
+  ///Transforma a numeração no formato linha digitável em código de barras.
+  ///Requer numeração completa (com ou sem formatação).
   String linhaDigitavelParaCodBarras(String codigo) {
-    ///Transforma a numeração no formato linha digitável em código de barras.
-    ///Requer numeração completa (com ou sem formatação).
     codigo = codigo.numericOnly;
 
     final tipoBoleto = identificarTipoBoleto(codigo);
@@ -204,12 +203,12 @@ class BoletoUtils {
     return resultado;
   }
 
+  ///Verifica a numeração, o tipo de código inserido e o tipo de boleto e retorna a data de vencimento.
+  ///Requer numeração completa (com ou sem formatação) e tipo de código que está sendo inserido (TipoCodigo.codigoDeBarra ou TipoCodigo.linhaDigitavel).
   DateTime identificarData({
     required String codigo,
     required TipoCodigo tipoCodigo,
   }) {
-    ///Verifica a numeração, o tipo de código inserido e o tipo de boleto e retorna a data de vencimento.
-    ///Requer numeração completa (com ou sem formatação) e tipo de código que está sendo inserido (TipoCodigo.codigoDeBarra ou TipoCodigo.linhaDigitavel).
     codigo = codigo.numericOnly;
     final tipoBoleto = identificarTipoBoleto(codigo);
 
@@ -237,21 +236,21 @@ class BoletoUtils {
     return dataBoleto;
   }
 
+  /// Verifica a numeração, o tipo de código inserido e o tipo de boleto e retorna a data de vencimento.
+  /// Requer numeração completa (com ou sem formatação) e tipo de código que está sendo inserido (TipoCodigo.codigoDeBarra ou TipoCodigo.linhaDigitavel).
+  ///
+  ///Se [formatada] for `true` retorna a linha digitável formatada quando for `TipoCodigo.codigoDeBarras`
   BoletoValidado validarBoleto(
     String codigo, {
     bool formatada = false,
-
-    ///Se for `true` retorna a linha digitável formatada quando for `TipoCodigo.codigoDeBarras`
   }) {
-    ///Verifica a numeração, o tipo de código inserido e o tipo de boleto e retorna a data de vencimento.
-    ///Requer numeração completa (com ou sem formatação) e tipo de código que está sendo inserido (TipoCodigo.codigoDeBarra ou TipoCodigo.linhaDigitavel).
     final tipoCodigo = identificarTipoCodigo(codigo);
 
     late BoletoValidado boletoValidado;
     codigo = codigo.numericOnly;
 
-    /// Boletos de cartão de crédito geralmente possuem 46 dígitos. É necessário adicionar mais um zero no final, para formar 47 caracteres
-    ///Alguns boletos de cartão de crédito do Itaú possuem 36 dígitos. É necessário acrescentar 11 zeros no final.
+    //  Boletos de cartão de crédito geralmente possuem 46 dígitos. É necessário adicionar mais um zero no final, para formar 47 caracteres
+    // Alguns boletos de cartão de crédito do Itaú possuem 36 dígitos. É necessário acrescentar 11 zeros no final.
     if (codigo.length == 36) {
       codigo = '${codigo}00000000000';
     } else if (codigo.length == 46) {
@@ -333,15 +332,15 @@ class BoletoUtils {
     return boletoValidado;
   }
 
+  ///Verifica a numeração do código de barras, extrai o DV (dígito verificador) presente na posição indicada, realiza o cálculo do dígito
+  ///utilizando o módulo indicado e retorna o dígito verificador. Serve para validar o código de barras.
+  ///Requer numeração completa (com ou sem formatação), caracteres numéricos que representam a posição do
+  ///dígito verificador no código de barras e caracteres numéricos que representam o módulo a ser usado (valores aceitos: 10 ou 11).
   String calculaDVCodBarras({
     required String codigo,
     required int posicaoCodigo,
     required int mod,
   }) {
-    ///Verifica a numeração do código de barras, extrai o DV (dígito verificador) presente na posição indicada, realiza o cálculo do dígito
-    ///utilizando o módulo indicado e retorna o dígito verificador. Serve para validar o código de barras.
-    ///Requer numeração completa (com ou sem formatação), caracteres numéricos que representam a posição do
-    ///dígito verificador no código de barras e caracteres numéricos que representam o módulo a ser usado (valores aceitos: 10 ou 11).
     codigo = codigo.numericOnly;
 
     final listaCodigo = codigo.split('');
@@ -448,16 +447,16 @@ class BoletoUtils {
     return codigo == resultado;
   }
 
+  /// Recebe uma string, identifica o tipo de código e retorna o valor do título
+  ///
+  /// Args:
+  /// codigo (String): O código a ser analisado.
+  ///
+  /// Retorna:
+  /// O valor do título.
+  ///
+  ///Requer numeração completa (com ou sem formatação).
   double identificarValor(String codigo) {
-    /// Recebe uma string, identifica o tipo de código e retorna o valor do título
-    ///
-    /// Args:
-    /// codigo (String): O código a ser analisado.
-    ///
-    /// Retorna:
-    /// O valor do título.
-    ///
-    ///Requer numeração completa (com ou sem formatação).
     codigo = codigo.numericOnly;
     final tipoCodigo = identificarTipoCodigo(codigo);
     if (tipoCodigo == TipoCodigo.codigoDeBarras) {
@@ -470,35 +469,34 @@ class BoletoUtils {
     return double.parse(valor);
   }
 
+  /// Identifica o banco emissor do código de barras.
+  ///
+  ///Verifica os três primeiros digitos e retorna o BancoEmissor com
+  ///número, nome do banco, ISPB, PDF com lista atualizada diariamente pelo Banco Central.
+  ///
+  /// Args:
+  /// codigo (String): String - O código a ser identificado.
+  ///
+  /// Retorna:
+  /// BancoEmissor
   BancoEmissor identificarBancoEmissor(String codigo) {
-    /// Identifica o banco emissor do código de barras.
-    ///
-    ///Verifica os três primeiros digitos e retorna o BancoEmissor com
-    ///número, nome do banco, ISPB, PDF com lista atualizada diariamente pelo Banco Central.
-    ///
-    /// Args:
-    /// codigo (String): String - O código a ser identificado.
-    ///
-    /// Retorna:
-    /// BancoEmissor
     codigo = codigo.numericOnly;
     String numeroBancoEmissor = '000';
     BancoEmissor? bancoEmissor;
     final tipoCodigo = identificarTipoCodigo(codigo);
     if (tipoCodigo != TipoCodigo.invalido) {
       numeroBancoEmissor = codigo.substring(0, 3);
+      // Percorre a Lista e retorna o primeiro BancoEmissor com o mesmo código identificado,
+      // caso não encontre retorna um BancoEmissor vazio
       bancoEmissor = kListaBancos.firstWhereOrEmpty(
         numeroBancoEmissor,
       );
-
-      ///Percorre a Lista e retorna o primeiro BancoEmissor com o mesmo código identificado,
-      ///caso não encontre retorna um BancoEmissor vazio
     }
     return bancoEmissor ?? BancoEmissor.empty();
   }
 
+  ///Realiza o cálculo Módulo 10 do número inserido.
   String calculaMod10(String numero) {
-    ///Realiza o cálculo Módulo 10 do número inserido.
     numero = numero.numericOnly;
     int i;
     int peso = 2;
@@ -521,8 +519,8 @@ class BoletoUtils {
     return soma.toString();
   }
 
+  ///	Realiza o cálculo Módulo 11 do número inserido.
   String calculaMod11(String numero) {
-    ///	Realiza o cálculo Módulo 11 do número inserido.
     final numeroReverso = numero.split('').reversed.join();
 
     int soma = 0;
